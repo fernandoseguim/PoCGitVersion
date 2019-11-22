@@ -62,7 +62,7 @@ stages:
         inputs:
           command: 'custom'
           projects: |
-            dotnet pack 
+            pack 
             '**/*.csproj'
             /p:VersionPrefix=$(GitVersion.NuGetVersion)
             /p:Configuration=Release
