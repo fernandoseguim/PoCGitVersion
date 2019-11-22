@@ -72,7 +72,7 @@ stages:
           arguments: '--skip-duplicate'
 
       - task: NuGetCommand@2
-        displayName: 'Push nuget on nuget.org'
+        displayName: 'Push nuget on  nuget.org'
         inputs:
           command: 'push'
           packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg;!$(Build.ArtifactStagingDirectory)/*.symbols.nupkg'
