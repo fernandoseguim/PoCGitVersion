@@ -5,6 +5,7 @@
 
 variables:
   BuildConfiguration: Release
+  FORCE_PUSH_NUGET: true
 
 trigger:
   branches:
@@ -60,7 +61,24 @@ stages:
 
       - script: |
           dotnet pack **/*.csproj --configuration $(BuildConfiguration) /p:VersionPrefix='$(GitVersion.NuGetVersionV2)' --no-build -o '$(build.artifactStagingDirectory)'
-        displayName: 'dotnet pack'
+        displayName: 'dotnet pack release'
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'push'
+          packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+          nuGetFeedType: 'internal'
+          publishVstsFeed: 'f85156e6-da44-41e1-a77f-d5e43fdc6a4e'
+        condition: eq('true', variables['FORCE_PUSH_NUGET'])
+
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'push'
+          packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+          nuGetFeedType: 'external'
+          publishFeedCredentials: 'Nuget'
+        condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq('true', variables['FORCE_PUSH_NUGET']))
 
       - task: PublishPipelineArtifact@0
         inputs:
