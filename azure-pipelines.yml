@@ -63,7 +63,6 @@ stages:
       - script: |
           dotnet pack **/*.csproj --configuration $(BuildConfiguration) /p:VersionPrefix='$(GitVersion.NuGetVersionV2)' --no-build -o '$(build.artifactStagingDirectory)'
         displayName: 'dotnet pack release'
-        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
 
       - task: DotNetCoreCLI@2
         inputs:
