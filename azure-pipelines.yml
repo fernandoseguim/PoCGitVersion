@@ -62,15 +62,6 @@ stages:
           dotnet pack **/*.csproj --configuration $(BuildConfiguration) /p:VersionPrefix='$(GitVersion.NuGetVersionV2)' --include-symbols --no-build -o '$(build.artifactStagingDirectory)'
         displayName: 'Dotnet pack'
 
-      - task: DotNetCoreCLI@2
-        displayName: 'Push nuget on internal feed'
-        inputs:
-          command: 'push'
-          packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-          nuGetFeedType: 'internal'
-          publishVstsFeed: 'f85156e6-da44-41e1-a77f-d5e43fdc6a4e'
-          arguments: '--skip-duplicate'
-
       - task: NuGetCommand@2
         displayName: 'Push nuget on  nuget.org'
         inputs:
