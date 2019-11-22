@@ -57,14 +57,15 @@ stages:
           command: test
           projects: '**/*[Tt]est*/*.csproj'
           arguments: '--configuration $(BuildConfiguration)'
-      
+
       - task: DotNetCoreCLI@2
-        displayName: 'dotnet pack release'
-        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
         inputs:
-          command: 'pack'
-          packagesToPack: '**/*.csproj'
-          buildProperties: '/p:VersionPrefix=$(GitVersion.NuGetVersion)'
+          command: 'custom'
+          projects: |
+            dotnet pack 
+            '**/*.csproj'
+            /p:VersionPrefix=$(GitVersion.NuGetVersion)
+            /p:Configuration=Release
 
       - task: PublishPipelineArtifact@0
         inputs:
