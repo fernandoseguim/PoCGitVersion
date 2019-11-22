@@ -13,6 +13,7 @@ trigger:
     - master
     - develop
     - feature/*
+    - hotfix/*
   paths:
     include:
     - src/*
