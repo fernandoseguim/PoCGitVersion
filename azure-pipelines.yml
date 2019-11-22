@@ -66,24 +66,7 @@ stages:
           projects: '**/*.csproj'
           includesymbols: false
           packDirectory: $(Build.ArtifactStagingDirectory)
-          verbosityPack: 'minimal'
-          versionEnvVar: '$(PackageVersion)'
-
-      - task: DotNetCoreCLI@2
-        displayName: 'dotnet pack pre-release'
-        condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/master'))
-        inputs:
-          command: 'pack'
-          packagesToPack: '**/*.csproj'
-          nobuild: true
-          includesymbols: true
-          includesource: true
-          packDirectory: $(Build.ArtifactStagingDirectory)
-          verbosityPack: 'minimal'   
-          versioningScheme: 'byPrereleaseNumber'
-          majorVersion: '$(MajorVersion)'
-          minorVersion: '$(MinorVersion)'
-          patchVersion: '$(Patch)'
+          versioningScheme: 'byBuildNumber'
 
       - task: PublishPipelineArtifact@0
         inputs:
