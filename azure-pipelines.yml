@@ -65,7 +65,6 @@ stages:
           command: pack
           projects: '**/*.csproj'
           includesymbols: false
-          packDirectory: $(Build.ArtifactStagingDirectory)
           versioningScheme: 'byBuildNumber'
 
       - task: PublishPipelineArtifact@0
