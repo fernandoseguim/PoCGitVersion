@@ -1,0 +1,128 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+variables:
+  BuildConfiguration: Release
+
+trigger:
+  branches:
+    include:
+    - master
+    - develop
+    - feature/*
+  paths:
+    include:
+    - src/*
+    - test/*
+    - azure-pipelines.yml
+
+resources:
+  containers:
+  - container: dynamodb
+    image: amazon/dynamodb-local
+    ports:
+      - 8000:8000
+    env:
+      AWS_ACCESS_KEY_ID: root
+      AWS_SECRET_ACCESS_KEY: secret
+
+stages:
+- stage: Build
+  jobs:
+    - job: Build
+      displayName: Build Artifacts
+      pool:
+        vmImage: 'ubuntu-latest'
+      timeoutInMinutes: 10
+      services:
+        dynamodb: dynamodb
+      steps:
+      - task: GitVersion@4
+        displayName: 'GitVersion'
+        inputs:
+          updateAssemblyInfo: true
+          preferBundledVersion: false
+
+      - script: echo %Action%%BuildVersion%
+        displayName: 'Set build version'
+        env:
+          Action: '##vso[build.updatebuildnumber]'
+          BuildVersion: $(GitVersion.SemVer)
+
+      - task: DotNetCoreCLI@2
+        displayName: Restore
+        inputs:
+          command: restore
+          projects: '**/*.csproj'
+
+      - task: DotNetCoreCLI@2
+        displayName: Build
+        inputs:
+          projects: '**/*.csproj'
+          arguments: '--configuration $(BuildConfiguration)'
+
+      - task: DotNetCoreCLI@2
+        displayName: Test
+        inputs:
+          command: test
+          projects: '**/*[Tt]est*/*.csproj'
+          arguments: '--configuration $(BuildConfiguration)'
+      
+      - task: DotNetCoreCLI@2
+        displayName: 'dotnet pack release'
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+        inputs:
+          command: pack
+          projects: '**/*.csproj'
+          includesymbols: false
+          packDirectory: $(Build.ArtifactStagingDirectory)
+          verbosityPack: 'minimal'
+          versionEnvVar: '$(PackageVersion)'
+
+      - task: DotNetCoreCLI@2
+        displayName: 'dotnet pack pre-release'
+        condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/master'))
+        inputs:
+          command: 'pack'
+          packagesToPack: '**/*.csproj'
+          nobuild: true
+          includesymbols: true
+          includesource: true
+          packDirectory: $(Build.ArtifactStagingDirectory)
+          verbosityPack: 'minimal'   
+          versioningScheme: 'byPrereleaseNumber'
+          majorVersion: '$(MajorVersion)'
+          minorVersion: '$(MinorVersion)'
+          patchVersion: '$(Patch)'
+
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'build-assets'
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+
+- stage: Release
+  displayName: Publish released artifacts
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  jobs:
+    - job: Deploy
+      displayName: Deploy Artifacts to Nuget.org
+      pool:
+        vmImage: 'ubuntu-latest'
+      timeoutInMinutes: 3
+      steps:
+      - checkout: none
+      - task: DownloadPipelineArtifact@1
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          artifactName: 'build-assets'
+          downloadPath: '$(System.ArtifactsDirectory)'
+      - task: NuGetCommand@2
+        displayName: 'push nuget'
+        inputs:
+          command: 'push'
+          packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+          nuGetFeedType: 'external'
+          publishFeedCredentials: 'Nuget'
