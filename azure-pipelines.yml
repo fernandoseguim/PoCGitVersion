@@ -58,14 +58,7 @@ stages:
           projects: '**/*[Tt]est*/*.csproj'
           arguments: '--configuration $(BuildConfiguration)'
 
-      - task: DotNetCoreCLI@2
-        inputs:
-          command: 'custom'
-          projects: |
-            pack 
-            '**/*.csproj'
-            /p:VersionPrefix=$(GitVersion.NuGetVersion)
-            /p:Configuration=Release
+      - script: dotnet pack **/*.csproj -c Release /p:VersionPrefix='$(GitVersion.NuGetVersion)' --no-build -o '$(build.artifactStagingDirectory)'
 
       - task: PublishPipelineArtifact@0
         inputs:
