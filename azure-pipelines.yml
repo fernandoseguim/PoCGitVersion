@@ -49,7 +49,7 @@ stages:
         displayName: Build
         inputs:
           projects: '**/*.csproj'
-          arguments: '--configuration $(BuildConfiguration) /p:Version=$(GitVersion.NuGetVersionV2)'
+          arguments: '--configuration $(BuildConfiguration) /p:Version=$(GitVersion.SemVer)'
 
       - task: DotNetCoreCLI@2
         displayName: Test
@@ -59,7 +59,7 @@ stages:
           arguments: '--configuration $(BuildConfiguration)'
 
       - script: |
-          dotnet pack **/*.csproj --configuration $(BuildConfiguration) /p:VersionPrefix='$(GitVersion.NuGetVersionV2)' --no-build -o '$(build.artifactStagingDirectory)'
+          dotnet pack **/*.csproj --configuration $(BuildConfiguration) /p:VersionPrefix='$(GitVersion.SemVer)' --no-build -o '$(build.artifactStagingDirectory)'
         displayName: 'dotnet pack'
 
       - task: PublishPipelineArtifact@0
