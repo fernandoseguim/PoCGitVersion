@@ -18,16 +18,6 @@ trigger:
     - test/*
     - azure-pipelines.yml
 
-resources:
-  containers:
-  - container: dynamodb
-    image: amazon/dynamodb-local
-    ports:
-      - 8000:8000
-    env:
-      AWS_ACCESS_KEY_ID: root
-      AWS_SECRET_ACCESS_KEY: secret
-
 stages:
 - stage: Build
   jobs:
@@ -35,11 +25,9 @@ stages:
       displayName: Build Artifacts
       pool:
         vmImage: 'ubuntu-latest'
-      timeoutInMinutes: 10
-      services:
-        dynamodb: dynamodb
+
       steps:
-      - task: GitVersion@4
+      - task: GitVersion@5
         displayName: 'GitVersion'
         inputs:
           updateAssemblyInfo: true
@@ -101,28 +89,3 @@ stages:
         inputs:
           artifactName: 'build-assets'
           targetPath: '$(Build.ArtifactStagingDirectory)'
-
-- stage: Release
-  displayName: Publish released artifacts
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-  jobs:
-    - job: Deploy
-      displayName: Deploy Artifacts to Nuget.org
-      pool:
-        vmImage: 'ubuntu-latest'
-      timeoutInMinutes: 3
-      steps:
-      - checkout: none
-      - task: DownloadPipelineArtifact@1
-        inputs:
-          buildType: 'current'
-          downloadType: 'single'
-          artifactName: 'build-assets'
-          downloadPath: '$(System.ArtifactsDirectory)'
-      - task: NuGetCommand@2
-        displayName: 'push nuget'
-        inputs:
-          command: 'push'
-          packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-          nuGetFeedType: 'external'
-          publishFeedCredentials: 'Nuget'
