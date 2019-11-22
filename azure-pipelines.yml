@@ -59,8 +59,7 @@ stages:
           arguments: '--configuration $(BuildConfiguration)'
 
       - script: |
-          dotnet pack **/*.csproj |
-          --configuration $(BuildConfiguration) /p:VersionPrefix='$(GitVersion.NuGetVersion)' --no-build -o '$(build.artifactStagingDirectory)'
+          dotnet pack **/*.csproj --configuration $(BuildConfiguration) /p:VersionPrefix='$(GitVersion.NuGetVersion)' --no-build -o '$(build.artifactStagingDirectory)'
         displayName: 'dotnet pack'
 
       - task: PublishPipelineArtifact@0
