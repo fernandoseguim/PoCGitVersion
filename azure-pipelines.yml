@@ -72,7 +72,8 @@ stages:
           publishVstsFeed: 'f85156e6-da44-41e1-a77f-d5e43fdc6a4e'
         condition: or(succeeded(), eq('true', variables['FORCE_PUSH_NUGET']))
 
-      - task: DotNetCoreCLI@2
+      - task: NuGetCommand@2
+        displayName: 'push nuget'
         inputs:
           command: 'push'
           packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
