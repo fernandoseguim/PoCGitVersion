@@ -65,6 +65,7 @@ stages:
         displayName: 'dotnet pack'
 
       - task: DotNetCoreCLI@2
+        displayName: 'push nuget on internal feed'
         inputs:
           command: 'push'
           packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
@@ -72,7 +73,7 @@ stages:
           publishVstsFeed: 'f85156e6-da44-41e1-a77f-d5e43fdc6a4e'
 
       - task: NuGetCommand@2
-        displayName: 'push nuget'
+        displayName: 'push nuget on nuget.org'
         inputs:
           command: 'push'
           packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg;!$(Build.ArtifactStagingDirectory)/*.symbols.nupkg'
