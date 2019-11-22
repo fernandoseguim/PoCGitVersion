@@ -58,15 +58,10 @@ stages:
           projects: '**/*[Tt]est*/*.csproj'
           arguments: '--configuration $(BuildConfiguration)'
 
-      - task: DotNetCoreCLI@2
-        displayName: 'dotnet pack release'
-        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-        inputs:
-          command: pack
-          projects: '**/*.csproj'
-          includesymbols: false
-          packDirectory: $(Build.ArtifactStagingDirectory)
-          arguments: '--configuration $(BuildConfiguration) /p:VersionPrefix=$(GitVersion.NuGetVersion)'
+      - script: |
+          dotnet pack **/*.csproj |
+          --configuration $(BuildConfiguration) /p:VersionPrefix='$(GitVersion.NuGetVersion)' --no-build -o '$(build.artifactStagingDirectory)'
+        displayName: 'dotnet pack'
 
       - task: PublishPipelineArtifact@0
         inputs:
