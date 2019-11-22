@@ -64,7 +64,6 @@ stages:
         inputs:
           command: 'pack'
           packagesToPack: '**/*.csproj'
-          versioningScheme: 'off'
           buildProperties: '/p:VersionPrefix=$(GitVersion.NuGetVersion)'
 
       - task: PublishPipelineArtifact@0
