@@ -35,7 +35,7 @@ stages:
           updateAssemblyInfo: true
           preferBundledVersion: false
 
-      - script: echo '%Action%%BuildVersion%'
+      - script: echo %BuildVersion%
         displayName: 'Set build version'
         env:
           Action: '##vso[build.updatebuildnumber]'
