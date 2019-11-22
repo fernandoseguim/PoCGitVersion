@@ -62,10 +62,10 @@ stages:
         displayName: 'dotnet pack release'
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
         inputs:
-          command: pack
-          projects: '**/*.csproj'
-          includesymbols: false
-          outputDir: '$(Build.ArtifactStagingDirectory)'
+          command: 'pack'
+          packagesToPack: '**/*.csproj'
+          versioningScheme: 'off'
+          buildProperties: '/p:VersionPrefix=$(GitVersion.NuGetVersion)'
 
       - task: PublishPipelineArtifact@0
         inputs:
